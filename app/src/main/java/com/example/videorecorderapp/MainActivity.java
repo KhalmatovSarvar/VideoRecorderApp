@@ -27,6 +27,7 @@ import com.serenegiant.widget.AspectRatioSurfaceView;
 import java.io.File;
 import java.util.Calendar;
 
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final boolean DEBUG = true;
@@ -34,8 +35,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final int DEFAULT_WIDTH = 640;
     private static final int DEFAULT_HEIGHT = 480;
+    private final Handler handler = new Handler();
+//    private  boolean isGoingToStart = false;
 
+    private long savingTime = 200L;
+
+    private  Runnable stopPeriodTaskAndStart;
+
+    private  Runnable startPeriodTaskAndStop;
     private ICameraHelper mCameraHelper;
+
 
     private AspectRatioSurfaceView mCameraViewMain;
 
@@ -48,6 +57,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setTitle("Video recording");
 
         initViews();
+        initRunnables();
+    }
+
+    private void initRunnables() {
+
+   stopPeriodTaskAndStart = ()->{
+            stopRecord();
+            handler.postDelayed(startPeriodTaskAndStop, savingTime);
+        };
+
+   startPeriodTaskAndStop = () -> {
+            startRecord();
+            handler.postDelayed(stopPeriodTaskAndStart, 60_000-savingTime);
+        };
+
     }
 
     private void initViews() {
@@ -171,17 +195,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.bthCaptureVideo) {
+            handler.removeCallbacks(startPeriodTaskAndStop);
+            handler.removeCallbacks(stopPeriodTaskAndStart);
+
             if (mCameraHelper != null) {
                 if (mCameraHelper.isRecording()) {
                     stopRecord();
                 } else {
-                    startRecord();
+                    startRecordEveryMinute();
                 }
             }
         }
     }
 
+    private void startRecordEveryMinute() {
+        Calendar calendar = Calendar.getInstance();
+        int currentSecond = calendar.get(Calendar.SECOND);
+
+        // Calculate the delay until the next minute
+        long delay = (60 - currentSecond) * 1000;
+        startRecord();
+
+        handler.postDelayed(stopPeriodTaskAndStart, delay);
+
+    }
+
     private void startRecord() {
+//        isGoingToStart = true;
+        Log.d("TTT", "Video is gonna start: " + System.currentTimeMillis());
         File file = FileUtils.getCaptureFile(this, Environment.DIRECTORY_MOVIES, ".mp4");
         VideoCapture.OutputFileOptions options =
                 new VideoCapture.OutputFileOptions.Builder(file).build();
@@ -198,16 +239,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mCameraHelper.startRecording(options, new VideoCapture.OnVideoCaptureCallback() {
             @Override
             public void onStart() {
+//                isGoingToStart = false;
+                Log.d("TTT", "Video is started: " + System.currentTimeMillis());
             }
 
             @Override
             public void onVideoSaved(@NonNull VideoCapture.OutputFileResults outputFileResults) {
+                Log.d("TTT", "onVideoSaved: "+System.currentTimeMillis());
                 Toast.makeText(
                         MainActivity.this,
                         "save \"" + UriHelper.getPath(MainActivity.this, outputFileResults.getSavedUri()) + "\"",
                         Toast.LENGTH_SHORT).show();
 
                 bthCaptureVideo.setColorFilter(0);
+                Log.d("TTT", "Video is saved: " + System.currentTimeMillis());
+//                if (isGoingToStart){
+//                    startRecord();
+//                }
             }
 
             @Override
@@ -223,7 +271,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void stopRecord() {
         if (mCameraHelper != null) {
+            Log.d("TTT", "Video is stopped: " + System.currentTimeMillis());
             mCameraHelper.stopRecording();
+
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacks(startPeriodTaskAndStop);
+        handler.removeCallbacks(stopPeriodTaskAndStart);
     }
 }
