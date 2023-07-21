@@ -1,5 +1,6 @@
 package com.example.videorecorderapp;
 
+import android.Manifest;
 import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
 import android.os.Environment;
@@ -8,6 +9,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -15,11 +17,18 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import com.example.videorecorderapp.fragment.DeviceListDialogFragment;
+import com.example.videorecorderapp.fragment.VideoFormatDialogFragment;
+import com.example.videorecorderapp.utils.Permissions;
+import com.example.videorecorderapp.utils.SaverHelper;
 import com.herohan.uvcapp.CameraHelper;
 import com.herohan.uvcapp.ICameraHelper;
 import com.herohan.uvcapp.VideoCapture;
 import com.serenegiant.usb.Size;
+import com.serenegiant.usb.UVCCamera;
+import com.serenegiant.usb.UVCParam;
 import com.serenegiant.utils.FileUtils;
 import com.serenegiant.utils.UriHelper;
 import com.serenegiant.widget.AspectRatioSurfaceView;
@@ -35,20 +44,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final int DEFAULT_WIDTH = 640;
     private static final int DEFAULT_HEIGHT = 480;
+    private final Object mSync = new Object();
+
+    private int mPreviewWidth = DEFAULT_WIDTH;
+    /**
+     * Camera preview height
+     */
+    private int mPreviewHeight = DEFAULT_HEIGHT;
+
+
+    private static final int PERMISSION_REQUEST_CODE = 4;
     private final Handler handler = new Handler();
-//    private  boolean isGoingToStart = false;
 
-    private long savingTime = 200L;
+    private UsbDevice mUsbDevice;
+    private long savingTime = 360L;
+    boolean isExceedMilliseconds = false;
 
-    private  Runnable stopPeriodTaskAndStart;
+    private Runnable stopPeriodTaskAndStart;
+    private DeviceListDialogFragment mDeviceListDialog;
 
-    private  Runnable startPeriodTaskAndStop;
+    private boolean mIsCameraConnected = false;
+
+    private Runnable startPeriodTaskAndStop;
     private ICameraHelper mCameraHelper;
+    private VideoFormatDialogFragment mVideoFormatDialog;
 
 
     private AspectRatioSurfaceView mCameraViewMain;
 
     private ImageView bthCaptureVideo;
+    private SaverHelper saverHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,20 +81,95 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         setTitle("Video recording");
 
+        getPermissions();
         initViews();
         initRunnables();
+        initListeners();
+    }
+
+    private void initListeners() {
+        saverHelper = new SaverHelper(this);
+
+        ImageView ivVideoFormat = findViewById(R.id.ic_video_format);
+        ivVideoFormat.setOnClickListener(this);
+
+        ImageView btnSettings = findViewById(R.id.ic_options);
+        btnSettings.setOnClickListener(this);
+
+    }
+
+    private void getPermissions() {
+        boolean hasPermissions = Permissions.checkPermissions(this);
+        if (hasPermissions) {
+            // Barcha huquqlar olingan
+        } else {
+            // Huquqlarni so'raymiz
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    private void showVideoFormatDialog() {
+        if (mVideoFormatDialog != null && mVideoFormatDialog.isAdded()) {
+            return;
+        }
+
+        mVideoFormatDialog = new VideoFormatDialogFragment(
+                mCameraHelper.getSupportedFormatList(),
+                mCameraHelper.getPreviewSize());
+
+        mVideoFormatDialog.setOnVideoFormatSelectListener(size -> {
+            if (mCameraHelper != null && mCameraHelper.isCameraOpened()) {
+                mCameraHelper.stopPreview();
+                mCameraHelper.setPreviewSize(size);
+                mCameraHelper.startPreview();
+
+                resizePreviewView(size);
+            }
+        });
+
+        mVideoFormatDialog.show(getSupportFragmentManager(), "video format dialog");
+
+    }
+
+    private void resizePreviewView(Size size) {
+        // Update the preview size
+        mPreviewWidth = size.width;
+        mPreviewHeight = size.height;
+        // Set the aspect ratio of SurfaceView to match the aspect ratio of the camera
+        mCameraViewMain.setAspectRatio(mPreviewWidth, mPreviewHeight);
     }
 
     private void initRunnables() {
 
-   stopPeriodTaskAndStart = ()->{
+        stopPeriodTaskAndStart = () -> {
             stopRecord();
             handler.postDelayed(startPeriodTaskAndStop, savingTime);
         };
 
-   startPeriodTaskAndStop = () -> {
+        startPeriodTaskAndStop = () -> {
+            Log.d("TTT", "startPeriodTaskAndStop: I am here");
+            Calendar calendar = Calendar.getInstance();
+            if (calendar.get(Calendar.MILLISECOND) >= 850) {
+                isExceedMilliseconds = true;
+            }
             startRecord();
-            handler.postDelayed(stopPeriodTaskAndStart, 60_000-savingTime);
+            if (isExceedMilliseconds) {
+                Log.d("TTT", "isExceedMilliseconds: EXCEEDED");
+                handler.postDelayed(stopPeriodTaskAndStart, 59_500 - savingTime);
+                isExceedMilliseconds = false;
+            } else {
+                Log.d("TTT", "isExceedMilliseconds:  NOT EXCEEDED");
+                handler.postDelayed(stopPeriodTaskAndStart, 60_000 - savingTime);
+            }
         };
 
     }
@@ -133,20 +233,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void selectDevice(final UsbDevice device) {
         if (DEBUG) Log.v(TAG, "selectDevice:device=" + device.getDeviceName());
+        mUsbDevice = device;
         mCameraHelper.selectDevice(device);
     }
 
     private final ICameraHelper.StateCallback mStateListener = new ICameraHelper.StateCallback() {
         @Override
         public void onAttach(UsbDevice device) {
-            if (DEBUG) Log.v(TAG, "onAttach:");
-            selectDevice(device);
+
+            synchronized (mSync) {
+                if (mUsbDevice == null && !device.equals(mUsbDevice)) {
+                    selectDevice(device);
+                }
+            }
         }
 
         @Override
         public void onDeviceOpen(UsbDevice device, boolean isFirstOpen) {
-            if (DEBUG) Log.v(TAG, "onDeviceOpen:");
-            mCameraHelper.openCamera();
+            if (mCameraHelper != null && device.equals(mUsbDevice)) {
+                UVCParam param = new UVCParam();
+                param.setQuirks(UVCCamera.UVC_QUIRK_FIX_BANDWIDTH);
+                mCameraHelper.openCamera(param);
+            }
         }
 
         @Override
@@ -164,6 +272,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             mCameraHelper.addSurface(mCameraViewMain.getHolder().getSurface(), false);
+            mIsCameraConnected = true;
         }
 
         @Override
@@ -173,6 +282,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (mCameraHelper != null) {
                 mCameraHelper.removeSurface(mCameraViewMain.getHolder().getSurface());
             }
+            mIsCameraConnected = false;
+
         }
 
         @Override
@@ -183,11 +294,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onDetach(UsbDevice device) {
             if (DEBUG) Log.v(TAG, "onDetach:");
+            if (device.equals(mUsbDevice)) {
+                mUsbDevice = null;
+            }
         }
 
         @Override
         public void onCancel(UsbDevice device) {
             if (DEBUG) Log.v(TAG, "onCancel:");
+            if (device.equals(mUsbDevice)) {
+                mUsbDevice = null;
+            }
         }
 
     };
@@ -206,14 +323,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         }
+
+        if (v.getId() == R.id.ic_video_format){
+            showVideoFormatDialog();
+        } else if (v.getId()==R.id.ic_options) {
+            showDeviceListDialog();
+        }
+    }
+
+    private void showDeviceListDialog() {
+        mDeviceListDialog = new DeviceListDialogFragment(mCameraHelper, mIsCameraConnected ? mUsbDevice : null);
+        mDeviceListDialog.setOnDeviceItemSelectListener(usbDevice -> {
+            if (mCameraHelper != null && mIsCameraConnected) {
+                mCameraHelper.closeCamera();
+            }
+            selectDevice(usbDevice);
+        });
+
+        mDeviceListDialog.show(getSupportFragmentManager(), "device_list_left");
     }
 
     private void startRecordEveryMinute() {
         Calendar calendar = Calendar.getInstance();
-        int currentSecond = calendar.get(Calendar.SECOND);
+        long currentSecond = calendar.get(Calendar.SECOND);
+        long currentMilliSecond = calendar.get(Calendar.MILLISECOND);
+        Log.d("TTT", "currentMilliSecond: " + currentMilliSecond);
 
         // Calculate the delay until the next minute
-        long delay = (60 - currentSecond) * 1000;
+        long delay = 60_000 - (currentSecond*1000+currentMilliSecond);
         startRecord();
 
         handler.postDelayed(stopPeriodTaskAndStart, delay);
@@ -223,39 +360,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void startRecord() {
 //        isGoingToStart = true;
         Log.d("TTT", "Video is gonna start: " + System.currentTimeMillis());
-        File file = FileUtils.getCaptureFile(this, Environment.DIRECTORY_MOVIES, ".mp4");
-        VideoCapture.OutputFileOptions options =
-                new VideoCapture.OutputFileOptions.Builder(file).build();
+        String videoFileName = saverHelper.generateVideoFileName();
+        Log.d("TTT", "videoFileName: "+videoFileName);
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES), videoFileName);
+        VideoCapture.OutputFileOptions options = new VideoCapture.OutputFileOptions.Builder(file).build();
 
-//        ContentValues contentValues = new ContentValues();
-//        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "NEW_VIDEO");
-//        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4");
-//
-//        VideoCapture.OutputFileOptions options = new VideoCapture.OutputFileOptions.Builder(
-//                getContentResolver(),
-//                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-//                contentValues).build();
 
         mCameraHelper.startRecording(options, new VideoCapture.OnVideoCaptureCallback() {
             @Override
             public void onStart() {
-//                isGoingToStart = false;
-                Log.d("TTT", "Video is started: " + System.currentTimeMillis());
+                Calendar calendar = Calendar.getInstance();
+                Log.d("TTT", "onStartVideoMIlliSeconds: " + calendar.get(Calendar.MILLISECOND));
+
             }
 
             @Override
             public void onVideoSaved(@NonNull VideoCapture.OutputFileResults outputFileResults) {
-                Log.d("TTT", "onVideoSaved: "+System.currentTimeMillis());
-                Toast.makeText(
-                        MainActivity.this,
-                        "save \"" + UriHelper.getPath(MainActivity.this, outputFileResults.getSavedUri()) + "\"",
-                        Toast.LENGTH_SHORT).show();
+                Log.d("TTT", "onVideoSaved: " + System.currentTimeMillis());
+                Log.d("TTT", "VideoSaved Succesfully: " + "save \"" + UriHelper.getPath(MainActivity.this, outputFileResults.getSavedUri()) + "\"");
 
                 bthCaptureVideo.setColorFilter(0);
-                Log.d("TTT", "Video is saved: " + System.currentTimeMillis());
-//                if (isGoingToStart){
-//                    startRecord();
-//                }
+
             }
 
             @Override
@@ -271,8 +396,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void stopRecord() {
         if (mCameraHelper != null) {
-            Log.d("TTT", "Video is stopped: " + System.currentTimeMillis());
             mCameraHelper.stopRecording();
+            Log.d("TTT", "Video is stopped: " + System.currentTimeMillis());
 
         }
     }
