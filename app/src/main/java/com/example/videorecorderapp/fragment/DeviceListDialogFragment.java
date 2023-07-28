@@ -16,6 +16,7 @@ import com.example.videorecorderapp.R;
 import com.example.videorecorderapp.adapter.DeviceItemRecyclerViewAdapter;
 import com.herohan.uvcapp.ICameraHelper;
 
+
 import java.lang.ref.WeakReference;
 import java.util.List;
 
