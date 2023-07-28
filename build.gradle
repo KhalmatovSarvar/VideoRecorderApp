@@ -3,3 +3,12 @@ plugins {
     id 'com.android.application' version '7.1.2' apply false
     id 'com.android.library' version '7.1.2' apply false
 }
+
+ext {
+    versionCompiler = 34
+    versionTarget = 34
+    versionMin = 21
+
+    javaSourceCompatibility = JavaVersion.VERSION_1_8
+    javaTargetCompatibility = JavaVersion.VERSION_1_8
+}
