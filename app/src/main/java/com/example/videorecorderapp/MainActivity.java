@@ -5,12 +5,9 @@ import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -22,7 +19,6 @@ import androidx.core.app.ActivityCompat;
 import com.example.videorecorderapp.fragment.DeviceListDialogFragment;
 import com.example.videorecorderapp.fragment.VideoFormatDialogFragment;
 import com.example.videorecorderapp.utils.Permissions;
-import com.example.videorecorderapp.utils.SaverHelper;
 import com.herohan.uvcapp.CameraHelper;
 import com.herohan.uvcapp.ICameraHelper;
 import com.herohan.uvcapp.VideoCapture;
@@ -73,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private AspectRatioSurfaceView mCameraViewMain;
 
     private ImageView bthCaptureVideo;
-    private SaverHelper saverHelper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initListeners() {
-        saverHelper = new SaverHelper(this);
+
 
         ImageView ivVideoFormat = findViewById(R.id.ic_video_format);
         ivVideoFormat.setOnClickListener(this);
