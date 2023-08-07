@@ -259,6 +259,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             mCameraHelper.startPreview();
 
+
             Size size = mCameraHelper.getPreviewSize();
             if (size != null) {
                 int width = size.width;
@@ -269,6 +270,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             mCameraHelper.addSurface(mCameraViewMain.getHolder().getSurface(), false);
             mIsCameraConnected = true;
+            //starting recording right after preview is started
+            startRecordEveryMinute();
         }
 
         @Override
