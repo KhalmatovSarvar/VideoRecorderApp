@@ -29,7 +29,7 @@ import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.TextureView;
 
-import com.serenegiant.utils.BuildConfig;
+import com.serenegiant.uvccamera.BuildConfig;
 
 /**
  * change the view size with keeping the specified aspect ratio.

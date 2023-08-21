@@ -23,6 +23,14 @@
 
 package com.serenegiant.usb;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.graphics.SurfaceTexture;
 import android.hardware.usb.UsbDevice;
 import android.text.TextUtils;
@@ -31,15 +39,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import com.serenegiant.usb.USBMonitor.UsbControlBlock;
-import com.serenegiant.utils.BuildConfig;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.serenegiant.uvccamera.BuildConfig;
 
 public class UVCCamera {
     private static final boolean DEBUG = BuildConfig.DEBUG;    // TODO set false when releasing

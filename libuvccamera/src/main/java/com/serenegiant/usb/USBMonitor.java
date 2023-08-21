@@ -23,6 +23,16 @@
 
 package com.serenegiant.usb;
 
+import java.io.UnsupportedEncodingException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -40,18 +50,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.serenegiant.utils.BuildConfig;
 import com.serenegiant.utils.HandlerThreadHandler;
+import com.serenegiant.uvccamera.BuildConfig;
 
-import java.io.UnsupportedEncodingException;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 
 public final class USBMonitor {
 

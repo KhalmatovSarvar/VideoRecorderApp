@@ -1,13 +1,13 @@
 package com.herohan.uvcapp;
 
-import android.hardware.usb.UsbDevice;
-
 import com.serenegiant.usb.Format;
 import com.serenegiant.usb.IButtonCallback;
 import com.serenegiant.usb.IFrameCallback;
 import com.serenegiant.usb.Size;
 import com.serenegiant.usb.UVCControl;
 import com.serenegiant.usb.UVCParam;
+
+import android.hardware.usb.UsbDevice;
 
 import java.util.List;
 

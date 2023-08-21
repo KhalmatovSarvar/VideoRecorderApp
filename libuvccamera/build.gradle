@@ -20,13 +20,10 @@
  *  Files in the libjpeg-turbo, libusb, libuvc, rapidjson folder
  *  may have a different license, see the respective files.
  */
-
 apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion versionCompiler
-
-    namespace = 'com.herohan.uvcapp'
 
     compileOptions {
         sourceCompatibility javaSourceCompatibility
@@ -36,6 +33,8 @@ android {
     defaultConfig {
         minSdkVersion versionMin
         targetSdkVersion versionTarget
+
+        namespace 'com.herohan.uvcapp'
 
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'

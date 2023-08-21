@@ -378,6 +378,8 @@ public class VideoCapture {
                 // Do the setup of the videoEncoder at the end of video recording instead of at the
                 // start of recording because it requires attaching a new Surface. This causes a
                 // glitch so we don't want that to incur latency at the start of capture.
+
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     setupEncoder();
                 } else {

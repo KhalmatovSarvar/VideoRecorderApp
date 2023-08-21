@@ -15,8 +15,8 @@ import com.serenegiant.usb.USBMonitor.OnDeviceConnectListener;
 import com.serenegiant.usb.USBMonitor.UsbControlBlock;
 import com.serenegiant.usb.UVCControl;
 import com.serenegiant.usb.UVCParam;
-import com.serenegiant.utils.BuildConfig;
 import com.serenegiant.utils.UVCUtils;
+import com.serenegiant.uvccamera.BuildConfig;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -294,7 +294,6 @@ class CameraConnectionService {
          * open device once again, open camera and start streaming
          *
          * @param device
-         * @param size
          */
         @Override
         public void openCamera(final UsbDevice device, UVCParam param,

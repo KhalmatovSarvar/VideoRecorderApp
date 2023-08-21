@@ -23,6 +23,9 @@
 
 package com.serenegiant.encoder;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 import android.content.Context;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
@@ -31,12 +34,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
-import com.serenegiant.utils.BuildConfig;
 import com.serenegiant.utils.UVCUtils;
 import com.serenegiant.utils.UriHelper;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
+import com.serenegiant.uvccamera.BuildConfig;
 
 
 public class MediaMuxerWrapper {

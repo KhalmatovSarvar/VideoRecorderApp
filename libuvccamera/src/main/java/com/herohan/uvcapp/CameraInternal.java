@@ -14,7 +14,8 @@ import com.serenegiant.usb.USBMonitor.UsbControlBlock;
 import com.serenegiant.usb.UVCCamera;
 import com.serenegiant.usb.UVCControl;
 import com.serenegiant.usb.UVCParam;
-import com.serenegiant.utils.BuildConfig;
+import com.serenegiant.uvccamera.BuildConfig;
+
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

@@ -23,16 +23,16 @@
 
 package com.serenegiant.encoder;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.util.Log;
 
-import com.serenegiant.utils.BuildConfig;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
+import com.serenegiant.uvccamera.BuildConfig;
 
 /**
  * This class receives video images as ByteBuffer(strongly recommend direct ByteBuffer) as NV21(YUV420SP)

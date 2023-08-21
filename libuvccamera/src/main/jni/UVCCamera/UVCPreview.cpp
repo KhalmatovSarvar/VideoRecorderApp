@@ -33,19 +33,12 @@
 #include "utilbase.h"
 #include "UVCPreview.h"
 #include "libuvc_internal.h"
-#include <string>
 
 #define MAX_FRAME 4
 // RGBA_8888/RGBX_8888:4
 // RGB_565:2
 #define PREVIEW_PIXEL_BYTES 4
 #define FRAME_POOL_SZ MAX_FRAME + 2
-
-class Mat;
-
-class Mat;
-
-class Mat;
 
 UVCPreview::UVCPreview(uvc_device_handle_t *devh)
         : mPreviewWindow(NULL),
@@ -367,8 +360,6 @@ void UVCPreview::clearDisplay() {
 int UVCPreview::startPreview() {
     ENTER();
 
-
-
     int result = EXIT_FAILURE;
     if (!isRunning()) {
         mIsRunning = true;
@@ -591,7 +582,6 @@ void UVCPreview::do_preview(uvc_stream_ctrl_t *ctrl) {
                         frame = draw_preview_one(frame, &mPreviewWindow, uvc_any2rgbx,
                                                  PREVIEW_PIXEL_BYTES);
 //                        c_end = clock();
-
 //                        LOGI("uvc_any2rgbx time: %f", (double) (c_end - c_start) / CLOCKS_PER_SEC);
                         addCaptureFrame(frame);
                     } else {
@@ -909,5 +899,3 @@ void UVCPreview::do_capture_callback(JNIEnv *env, uvc_frame_t *frame) {
     }
     EXIT();
 }
-
-
