@@ -39,8 +39,8 @@ public class SaverHelper {
     }
 
     public String generateVideoFileName() {
-        SimpleDateFormat sdf = new SimpleDateFormat("HHmmss", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         String currentTime = sdf.format(new Date());
-        return  ".mp4"; // Assuming the video format is MP4
+        return currentTime + ".mp4"; // Assuming the video format is MP4
     }
 }

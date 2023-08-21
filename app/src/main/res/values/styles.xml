@@ -57,13 +57,13 @@
     <style name="FragmentCameraControlsRadioButton" parent="">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@color/black</item>
+        <item name="android:textColor">@color/DEEPPINK</item>
     </style>
 
     <style name="FragmentCameraControlsBottomButton" parent="">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:background">#00000000</item>
-        <item name="android:textColor">@color/black</item>
+        <item name="android:textColor">@color/DEEPPINK</item>
     </style>
 </resources>

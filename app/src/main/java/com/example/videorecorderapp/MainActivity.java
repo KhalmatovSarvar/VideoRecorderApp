@@ -5,12 +5,9 @@ import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -29,7 +26,6 @@ import com.herohan.uvcapp.VideoCapture;
 import com.serenegiant.usb.Size;
 import com.serenegiant.usb.UVCCamera;
 import com.serenegiant.usb.UVCParam;
-import com.serenegiant.utils.FileUtils;
 import com.serenegiant.utils.UriHelper;
 import com.serenegiant.widget.AspectRatioSurfaceView;
 
@@ -57,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final Handler handler = new Handler();
 
     private UsbDevice mUsbDevice;
-    private long savingTime = 660L;
+    private long savingTime = 360L;
     boolean isExceedMilliseconds = false;
 
     private Runnable stopPeriodTaskAndStart;
@@ -74,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private ImageView bthCaptureVideo;
     private SaverHelper saverHelper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -361,12 +358,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void startRecord() {
+
+
 //        isGoingToStart = true;
         Log.d("TTT", "Video is gonna start: " + System.currentTimeMillis());
-//        String videoFileName = saverHelper.generateVideoFileName();
-//        Log.d("TTT", "videoFileName: "+videoFileName);
-//        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES), videoFileName);
-        File file = FileUtils.getCaptureFile(this, Environment.DIRECTORY_MOVIES, ".mp4");
+        String videoFileName = saverHelper.generateVideoFileName();
+        Log.d("TTT", "videoFileName: "+videoFileName);
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES), videoFileName);
         VideoCapture.OutputFileOptions options = new VideoCapture.OutputFileOptions.Builder(file).build();
 
 
