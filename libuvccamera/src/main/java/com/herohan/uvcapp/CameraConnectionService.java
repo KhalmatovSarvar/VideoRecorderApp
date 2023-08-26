@@ -1,5 +1,7 @@
 package com.herohan.uvcapp;
 
+import static com.herohan.uvcapp.ImageCapture.ERROR_INVALID_CAMERA;
+
 import android.hardware.usb.UsbDevice;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -15,8 +17,9 @@ import com.serenegiant.usb.USBMonitor.OnDeviceConnectListener;
 import com.serenegiant.usb.USBMonitor.UsbControlBlock;
 import com.serenegiant.usb.UVCControl;
 import com.serenegiant.usb.UVCParam;
-import com.serenegiant.utils.BuildConfig;
 import com.serenegiant.utils.UVCUtils;
+import com.serenegiant.uvccamera.BuildConfig;
+import com.serenegiant.uvccamera.R;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -150,7 +153,8 @@ class CameraConnectionService {
         }
 
         private String getCameraKey(UsbDevice device) {
-            return USBMonitor.getDeviceKey(device);
+//            return USBMonitor.getDeviceKey(device);
+            return String.valueOf(device.getDeviceId());
         }
         //********************************************************************************
 
@@ -188,7 +192,7 @@ class CameraConnectionService {
          * @param device
          */
         @Override
-        public void selectDevice(final UsbDevice device) {
+        public void selectDevice(final UsbDevice device) throws Exception {
             if (DEBUG)
                 Log.d(TAG, LOG_PREFIX + "selectDevice:device=" + (device != null ? device.getDeviceName() : null));
             final String cameraKey = getCameraKey(device);
@@ -292,9 +296,6 @@ class CameraConnectionService {
 
         /**
          * open device once again, open camera and start streaming
-         *
-         * @param device
-         * @param size
          */
         @Override
         public void openCamera(final UsbDevice device, UVCParam param,
@@ -370,6 +371,9 @@ class CameraConnectionService {
             final CameraInternal cameraInternal = getCamera(device);
             if (cameraInternal != null) {
                 cameraInternal.takePicture(options, callback);
+            } else {
+                String message = "Camera not available";
+                callback.onError(ERROR_INVALID_CAMERA, message, new IllegalStateException(message));
             }
         }
 
@@ -534,6 +538,17 @@ class CameraConnectionService {
                             mIsCameraOpened = false;
                         }
                     }
+
+                    @Override
+                    public void onError(CameraException e) {
+                        if (mWeakStateCallback.get() != null) {
+                            try {
+                                mWeakStateCallback.get().onError(device, e);
+                            } catch (Exception e1) {
+                                e1.printStackTrace();
+                            }
+                        }
+                    }
                 });
 
                 if (mWeakStateCallback.get() != null) {
@@ -584,6 +599,27 @@ class CameraConnectionService {
                         mWeakStateCallback.get().onCancel(device);
                     } catch (Exception e) {
                         e.printStackTrace();
+                    }
+                }
+
+                synchronized (mConnectionSync) {
+                    mConnectionSync.notifyAll();
+                }
+            }
+
+            @Override
+            public void onError(UsbDevice device, USBMonitor.USBException e) {
+                if (DEBUG) Log.d(TAG, "OnDeviceConnectListener#onError:");
+
+                if (mWeakStateCallback.get() != null) {
+                    try {
+                        CameraException ex;
+                        if (e.getCode() == USBMonitor.USB_OPEN_ERROR_UNKNOWN) {
+                            ex = new CameraException(CameraException.CAMERA_OPEN_ERROR_UNKNOWN, e.getMessage());
+                            mWeakStateCallback.get().onError(device, ex);
+                        }
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
                     }
                 }
 

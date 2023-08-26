@@ -42,8 +42,8 @@ import com.serenegiant.encoder.MediaVideoEncoder;
 import com.serenegiant.opengl.EGLBase;
 import com.serenegiant.opengl.GLDrawer2D;
 import com.serenegiant.opengl.GLHelper;
-import com.serenegiant.utils.BuildConfig;
 import com.serenegiant.utils.FpsCounter;
+import com.serenegiant.uvccamera.BuildConfig;
 
 /**
  * change the view size with keeping the specified aspect ratio.

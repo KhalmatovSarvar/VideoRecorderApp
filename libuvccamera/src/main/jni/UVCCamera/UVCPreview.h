@@ -30,6 +30,9 @@
 #include <android/native_window.h>
 #include "objectarray.h"
 
+
+
+
 #pragma interface
 
 #define DEFAULT_PREVIEW_WIDTH 640
@@ -56,6 +59,11 @@ typedef struct {
 } Fields_iframecallback;
 
 class UVCPreview {
+
+public:
+
+//	void get_device_name(const uvc_device_handle_t *deviceHandle);
+
 private:
 	uvc_device_handle_t *mDeviceHandle;
 	ANativeWindow *mPreviewWindow;
@@ -92,6 +100,8 @@ private:
 	pthread_mutex_t pool_mutex;
 	ObjectArray<uvc_frame_t *> mFramePool;
 	uvc_frame_t *get_frame(size_t data_bytes);
+
+
 	void recycle_frame(uvc_frame_t *frame);
 	void init_pool(size_t data_bytes);
 	void clear_pool();
@@ -107,7 +117,9 @@ private:
 	uvc_frame_t *draw_preview_one(uvc_frame_t *frame, ANativeWindow **window, convFunc_t func, int pixelBytes);
 //
 	void addCaptureFrame(uvc_frame_t *frame);
+//    void addTextOverlayToFrame(cv::Mat& frame, const std::string& text, int x, int y, const cv::Scalar& color, int fontSize);
 	uvc_frame_t *waitCaptureFrame();
+
 	void clearCaptureFrame();
 	static void *capture_thread_func(void *vptr_args);
 	void do_capture(JNIEnv *env);

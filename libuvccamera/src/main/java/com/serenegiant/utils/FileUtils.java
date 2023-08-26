@@ -11,7 +11,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
-import com.herohan.uvcapp.R;
+import com.serenegiant.uvccamera.R;
 
 import java.io.BufferedReader;
 import java.io.File;

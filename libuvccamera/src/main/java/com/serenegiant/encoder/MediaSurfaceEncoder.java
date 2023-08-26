@@ -23,21 +23,22 @@
 
 package com.serenegiant.encoder;
 
+import java.io.IOException;
+
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.util.Log;
+import android.view.Surface;
 
-import com.serenegiant.utils.BuildConfig;
-
-import java.io.IOException;
+import com.serenegiant.uvccamera.BuildConfig;
 
 public class MediaSurfaceEncoder extends MediaEncoder implements IVideoEncoder {
     private static final boolean DEBUG = BuildConfig.DEBUG;    // TODO set false on release
     private static final String TAG = "MediaSurfaceEncoder";
 
-    private static final String MIME_TYPE = "video/hevc";
+    private static final String MIME_TYPE = "video/avc";
     // parameters for recording
     private final int mWidth, mHeight;
     protected int mColorFormat;

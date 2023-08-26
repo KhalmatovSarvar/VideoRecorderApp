@@ -18,6 +18,8 @@ import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.serenegiant.uvccamera.BuildConfig;
+
 import java.io.File;
 import java.util.ArrayList;
 

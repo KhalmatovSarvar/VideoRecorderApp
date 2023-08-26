@@ -25,6 +25,11 @@
 #include <stdlib.h>
 #include <linux/time.h>
 #include <unistd.h>
+#include <opencv2/core/types_c.h>
+#include <opencv2/core/core_c.h>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/opencv.hpp>
 
 #ifndef LOG_NDEBUG
 #define  LOCAL_DEBUG 1
@@ -33,19 +38,17 @@
 #include "utilbase.h"
 #include "UVCPreview.h"
 #include "libuvc_internal.h"
-#include <string>
+#include "Parameters.h"
+
+
+
+
 
 #define MAX_FRAME 4
 // RGBA_8888/RGBX_8888:4
 // RGB_565:2
 #define PREVIEW_PIXEL_BYTES 4
 #define FRAME_POOL_SZ MAX_FRAME + 2
-
-class Mat;
-
-class Mat;
-
-class Mat;
 
 UVCPreview::UVCPreview(uvc_device_handle_t *devh)
         : mPreviewWindow(NULL),
@@ -100,6 +103,7 @@ UVCPreview::~UVCPreview() {
     pthread_mutex_destroy(&capture_mutex);
     pthread_cond_destroy(&capture_sync);
     pthread_mutex_destroy(&pool_mutex);
+
     EXIT();
 }
 
@@ -136,6 +140,8 @@ void UVCPreview::recycle_frame(uvc_frame_t *frame) {
         uvc_free_frame(frame);
     }
 }
+
+
 
 
 void UVCPreview::init_pool(size_t data_bytes) {
@@ -367,8 +373,6 @@ void UVCPreview::clearDisplay() {
 int UVCPreview::startPreview() {
     ENTER();
 
-
-
     int result = EXIT_FAILURE;
     if (!isRunning()) {
         mIsRunning = true;
@@ -583,6 +587,35 @@ void UVCPreview::do_preview(uvc_stream_ctrl_t *ctrl) {
                     frame = get_frame(frame_mjpeg->width * frame_mjpeg->height * 2);
 //                    c_start = clock();
                     result = uvc_mjpeg2yuyv(frame_mjpeg, frame);   // MJPEG => yuyv
+                    // Convert the frame to an OpenCV Mat
+                    cv::Mat cvFrame(frame->height, frame->width, CV_8UC2, frame->data);
+
+                    std::string deviceName;
+                    // Retrieve device descriptor
+
+
+
+
+                    uvc_device_descriptor_t *desc;
+                    if (uvc_get_device_descriptor(mDeviceHandle->dev, &desc) == UVC_SUCCESS) {
+                        // Use the product name if available, else create a default name
+                        if (desc->product) {
+                            deviceName = desc->product;
+                        } else {
+                            char defaultName[256];
+                            snprintf(defaultName, sizeof(defaultName), "UVC Camera (%s:%s)", desc->manufacturer ? desc->manufacturer : "Unknown Manufacturer", desc->serialNumber ? desc->serialNumber : "Unknown Serial");
+                            deviceName = defaultName;
+                        }
+
+                        uvc_free_device_descriptor(desc);
+                    } else {
+                        // Handle error if descriptor retrieval fails
+                        deviceName = "Unknown Device";
+                    }
+
+                    // Add text to the frame using OpenCV
+                    std::string text = deviceName;
+                    cv::putText(cvFrame, text, cv::Point(20, 35), cv::FONT_HERSHEY_PLAIN, 3, cv::Scalar(255, 128 , 128),2 );
 //                    c_end = clock();
 //                    LOGI("uvc_mjpeg2yuyv time: %f", (double) (c_end - c_start) / CLOCKS_PER_SEC);
                     recycle_frame(frame_mjpeg);
@@ -590,8 +623,9 @@ void UVCPreview::do_preview(uvc_stream_ctrl_t *ctrl) {
 //                        c_start = clock();
                         frame = draw_preview_one(frame, &mPreviewWindow, uvc_any2rgbx,
                                                  PREVIEW_PIXEL_BYTES);
-//                        c_end = clock();
 
+
+//                        c_end = clock();
 //                        LOGI("uvc_any2rgbx time: %f", (double) (c_end - c_start) / CLOCKS_PER_SEC);
                         addCaptureFrame(frame);
                     } else {
@@ -607,8 +641,7 @@ void UVCPreview::do_preview(uvc_stream_ctrl_t *ctrl) {
 //                    c_start = clock();
                     frame = draw_preview_one(frame, &mPreviewWindow, uvc_any2rgbx,
                                              PREVIEW_PIXEL_BYTES);
-//                    c_end = clock();
-//                    LOGI("uvc_any2rgbx time: %f", (double) (c_end - c_start) / CLOCKS_PER_SEC);
+
                     addCaptureFrame(frame);
                 }
             }
@@ -746,6 +779,11 @@ void UVCPreview::addCaptureFrame(uvc_frame_t *frame) {
     pthread_mutex_unlock(&capture_mutex);
 }
 
+//void UVCPreview::addTextOverlayToFrame(cv::Mat& frame, const std::string& text, int x, int y, const cv::Scalar& color, int fontSize) {
+//    cv::putText(frame, text, cv::Point(x, y), cv::FONT_HERSHEY_SIMPLEX, fontSize / 10.0, color, 1, cv::LINE_AA);
+//}
+
+
 /**
  * get frame data for capturing, if not exist, block and wait
  */
@@ -766,7 +804,7 @@ uvc_frame_t *UVCPreview::waitCaptureFrame() {
 }
 
 /**
- * clear drame data for capturing
+ * clear frame data for capturing
  */
 void UVCPreview::clearCaptureFrame() {
     pthread_mutex_lock(&capture_mutex);
@@ -874,7 +912,47 @@ void UVCPreview::do_capture_surface(JNIEnv *env) {
 
     EXIT();
 }
-
+//void UVCPreview::do_capture_surface(JNIEnv *env) {
+//    ENTER();
+//
+//    uvc_frame_t *frame = NULL;
+//    uvc_frame_t *converted = NULL;
+//    char *local_picture_path;
+//
+//    for (; isRunning() && isCapturing();) {
+//        frame = waitCaptureFrame();
+//        if (LIKELY(frame)) {
+//            // frame data is always YUYV format.
+//            if (LIKELY(isCapturing())) {
+//                if (UNLIKELY(!converted)) {
+//                    converted = get_frame(previewBytes);
+//                }
+//                if (LIKELY(converted)) {
+//                    int b = uvc_any2rgbx(frame, converted);
+//                    if (!b) {
+//                        if (LIKELY(mCaptureWindow)) {
+//                            // Add OSD text overlay
+//                            cv::Mat cvFrame(frame->height, frame->width, CV_8UC4, converted->data);
+//                            addTextOverlayToFrame(cvFrame, "Your OSD Text", 10, 30, cv::Scalar(255,255,255), 16);
+//
+//                            copyToSurface(converted, &mCaptureWindow);
+//                        }
+//                    }
+//                }
+//            }
+//            do_capture_callback(env, frame);
+//        }
+//    }
+//    if (converted) {
+//        recycle_frame(converted);
+//    }
+//    if (mCaptureWindow) {
+//        ANativeWindow_release(mCaptureWindow);
+//        mCaptureWindow = NULL;
+//    }
+//
+//    EXIT();
+//}
 /**
 * call IFrameCallback#onFrame if needs
  */
@@ -909,5 +987,29 @@ void UVCPreview::do_capture_callback(JNIEnv *env, uvc_frame_t *frame) {
     }
     EXIT();
 }
+
+//void UVCPreview::get_device_name(const uvc_device_handle_t *deviceHandle) {
+//    std::string deviceName;
+//
+//    // Retrieve device descriptor
+//    uvc_device_descriptor_t *desc;
+//    if (uvc_get_device_descriptor(deviceHandle->dev, &desc) == UVC_SUCCESS) {
+//        // Use the product name if available, else create a default name
+//        if (desc->product) {
+//            deviceName = desc->product;
+//        } else {
+//            char defaultName[256];
+//            snprintf(defaultName, sizeof(defaultName), "UVC Camera (%x:%x)", desc->idVendor, desc->idProduct);
+//            deviceName = defaultName;
+//        }
+//
+//        uvc_free_device_descriptor(desc);
+//    } else {
+//        // Handle error if descriptor retrieval fails
+//        deviceName = "Unknown Device";
+//    }
+//
+//    return deviceName;
+//}
 
 

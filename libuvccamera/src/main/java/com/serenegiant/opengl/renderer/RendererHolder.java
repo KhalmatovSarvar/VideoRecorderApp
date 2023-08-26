@@ -1,11 +1,13 @@
 package com.serenegiant.opengl.renderer;
 
-import static com.serenegiant.opengl.ShaderConst.GL_TEXTURE_EXTERNAL_OES;
-
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -15,21 +17,20 @@ import android.util.SparseArray;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.serenegiant.opengl.EGLBase;
 import com.serenegiant.opengl.EGLTask;
 import com.serenegiant.opengl.GLDrawer2D;
 import com.serenegiant.opengl.GLHelper;
-import com.serenegiant.utils.BuildConfig;
 import com.serenegiant.utils.UVCUtils;
+import com.serenegiant.uvccamera.BuildConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static com.serenegiant.opengl.ShaderConst.GL_TEXTURE_EXTERNAL_OES;
 
 /**
  * Hold shared texture that receive camera frame and draw them to registered surface if needs

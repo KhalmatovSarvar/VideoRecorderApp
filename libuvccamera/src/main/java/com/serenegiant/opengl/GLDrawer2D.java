@@ -18,18 +18,18 @@ package com.serenegiant.opengl;
  *  limitations under the License.
 */
 
-import static com.serenegiant.opengl.ShaderConst.FRAGMENT_SHADER_SIMPLE;
-import static com.serenegiant.opengl.ShaderConst.FRAGMENT_SHADER_SIMPLE_OES;
-import static com.serenegiant.opengl.ShaderConst.GL_TEXTURE_2D;
-import static com.serenegiant.opengl.ShaderConst.GL_TEXTURE_EXTERNAL_OES;
-import static com.serenegiant.opengl.ShaderConst.VERTEX_SHADER;
-
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+
+import static com.serenegiant.opengl.ShaderConst.FRAGMENT_SHADER_SIMPLE;
+import static com.serenegiant.opengl.ShaderConst.FRAGMENT_SHADER_SIMPLE_OES;
+import static com.serenegiant.opengl.ShaderConst.GL_TEXTURE_2D;
+import static com.serenegiant.opengl.ShaderConst.GL_TEXTURE_EXTERNAL_OES;
+import static com.serenegiant.opengl.ShaderConst.VERTEX_SHADER;
 
 /**
  * 描画領域全面にテクスチャを2D描画するためのヘルパークラス
@@ -175,7 +175,6 @@ public class GLDrawer2D implements IDrawer2D {
 		GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, VERTEX_NUM);
 		GLES20.glBindTexture(mTexTarget, 0);
         GLES20.glUseProgram(0);
-		System.out.println("Drawing) ");
 	}
 
 	/**

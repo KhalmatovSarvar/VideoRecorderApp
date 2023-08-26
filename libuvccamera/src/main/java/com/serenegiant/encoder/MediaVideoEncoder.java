@@ -23,6 +23,8 @@
 
 package com.serenegiant.encoder;
 
+import java.io.IOException;
+
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
@@ -31,9 +33,7 @@ import android.util.Log;
 
 import com.serenegiant.opengl.EGLBase;
 import com.serenegiant.opengl.utils.RenderHandler;
-import com.serenegiant.utils.BuildConfig;
-
-import java.io.IOException;
+import com.serenegiant.uvccamera.BuildConfig;
 
 /**
  * Encode texture images as H.264 video
@@ -45,7 +45,7 @@ public class MediaVideoEncoder extends MediaEncoder implements IVideoEncoder {
     private static final boolean DEBUG = BuildConfig.DEBUG;    // TODO set false on release
     private static final String TAG = "MediaVideoEncoder";
 
-    private static final String MIME_TYPE = "video/hevc";
+    private static final String MIME_TYPE = "video/avc";
     // parameters for recording
     private final int mWidth, mHeight;
     protected int mColorFormat;

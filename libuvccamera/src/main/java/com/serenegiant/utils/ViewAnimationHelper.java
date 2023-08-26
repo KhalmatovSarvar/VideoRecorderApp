@@ -22,13 +22,14 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.annotation.SuppressLint;
+
+import androidx.annotation.NonNull;
+
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
 
-import androidx.annotation.NonNull;
-
-import com.herohan.uvcapp.R;
+import com.serenegiant.uvccamera.R;
 
 public class ViewAnimationHelper {
     private static final String TAG = ViewAnimationHelper.class.getSimpleName();

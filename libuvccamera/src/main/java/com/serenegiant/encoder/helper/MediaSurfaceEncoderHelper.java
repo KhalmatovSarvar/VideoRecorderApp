@@ -1,8 +1,6 @@
 package com.serenegiant.encoder.helper;
 
-
-
-import static com.serenegiant.utils.BuildConfig.DEBUG;
+import static com.serenegiant.uvccamera.BuildConfig.DEBUG;
 
 import android.content.Context;
 import android.media.MediaScannerConnection;

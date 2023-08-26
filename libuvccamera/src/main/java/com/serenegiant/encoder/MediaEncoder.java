@@ -23,6 +23,12 @@
 
 package com.serenegiant.encoder;
 
+import static com.serenegiant.uvccamera.BuildConfig.DEBUG;
+
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
+
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.net.Uri;
@@ -30,11 +36,7 @@ import android.os.Build;
 import android.util.Log;
 import android.view.Surface;
 
-import com.serenegiant.utils.BuildConfig;
-
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.nio.ByteBuffer;
+import com.serenegiant.uvccamera.BuildConfig;
 
 public abstract class MediaEncoder extends Thread {
     private static final boolean DEBUG = BuildConfig.DEBUG;    // TODO set false on release

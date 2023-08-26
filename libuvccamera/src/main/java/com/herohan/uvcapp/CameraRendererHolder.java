@@ -13,7 +13,7 @@ import com.serenegiant.opengl.GLDrawer2D;
 import com.serenegiant.opengl.renderer.MirrorMode;
 import com.serenegiant.opengl.renderer.RendererHolder;
 import com.serenegiant.opengl.renderer.RendererHolderCallback;
-import com.serenegiant.utils.BuildConfig;
+import com.serenegiant.uvccamera.BuildConfig;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -56,8 +56,12 @@ class CameraRendererHolder extends RendererHolder implements ICameraRendererHold
     public void captureImage(OnImageCapturedCallback callback) {
         mRendererHandler.post(() -> {
             // Capture still image
-            ImageRawData data = mCaptureHolder.captureImageRawData();
-            callback.onCaptureSuccess(data);
+            try {
+                ImageRawData data = mCaptureHolder.captureImageRawData();
+                callback.onCaptureSuccess(data);
+            } catch (Exception e) {
+                callback.onError(e);
+            }
         });
     }
 
